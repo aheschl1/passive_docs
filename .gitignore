@@ -1,0 +1,5 @@
+*.egg-*
+work/
+__pycache__
+*.txt
+.venv
