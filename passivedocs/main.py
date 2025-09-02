@@ -13,15 +13,13 @@ from .config import Config
 def prepare_context(repo_path: Path):
     config = repo_path / "passivedocs.yml"
     readme = repo_path / "README.md"
-    if not config.exists():
-        raise FileNotFoundError(f"Expected config file not found: {config}")
-    
+    # passivedocs.yml is optional. If it does not exist, use an empty config.
     with open(readme, 'r') as f:
         readme = f.read()
 
-    config = Config(config)
+    config_obj = Config(config if config.exists() else None)
 
-    return readme, config
+    return readme, config_obj
 
 
 def clone_repo(repo_name: str, work_dir: Path):

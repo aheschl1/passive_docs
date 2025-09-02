@@ -27,6 +27,10 @@ export MODEL="llama2:13b"
 passivedocs git@github.com:owner/repo.git
 ```
 
+Configuration file (`passivedocs.yml`)
+
+If a repository contains a `passivedocs.yml` file it will be read and used. This file is optional. If it is absent the agent will proceed and will not ignore any files (i.e., no ignore rules are applied).
+
 Docker build and run
 
 The provided `Dockerfile` builds a small image with the `passivedocs` CLI installed. The image does not require model or endpoint values at build time — provide them when you run the container so one image can be used for many runs and repositories.
