@@ -3,16 +3,17 @@ from setuptools import setup, find_packages
 setup(
     name="passivedocs",
     version="0.1.0",
-    packages=find_packages(where="src"),
-    package_dir={"": "src"},
+    packages=find_packages(),
     install_requires=[
         "ollama",
         "python-dotenv",
-        "click"
+        "click",
+        "PyYAML",
+        # 'glob' is part of the stdlib; not a real dependency
     ],
     entry_points={
         "console_scripts": [
-            "passivedocs=main:main"
+            "passivedocs=passivedocs.main:main"
         ]
     },
     author="",
