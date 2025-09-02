@@ -43,10 +43,28 @@ docker build -t passivedocs:latest .
 
 Run the container (required: provide runtime environment variables):
 
+Mount a host `work` directory into the container so repository clones and PR branches persist on the host. Two options are supported if you have permission problems with mounts:
+
+1) Preferred: create a host directory owned by your UID and mount it. This ensures the non-root `passivedocs` user inside the container can write to it.
+
 ```bash
+mkdir -p ./work
+sudo chown $(id -u):$(id -g) ./work
 docker run --rm -e ENDPOINT="http://ollama.local:11434" -e MODEL="llama2:13b" \
+  -v $(pwd)/work:/work \
   passivedocs:latest git@github.com:owner/repo.git
 ```
+
+2. Fallback: if you cannot change host ownership, the container will detect if the mounted `/work` is not writable by the runtime user and automatically use a writable fallback under `/tmp` inside the container; persistent host storage won't be available in that case. To explicitly control the workspace from the host or from Docker, pass `--work-dir` to the CLI or set the `WORK_DIR` environment variable.
+
+```bash
+# Explicitly set work dir inside container (overrides WORK_DIR env):
+docker run --rm -e ENDPOINT="http://ollama.local:11434" -e MODEL="llama2:13b" \
+  -v $(pwd)/work:/work \
+  passivedocs:latest git@github.com:owner/repo.git --work-dir /work
+```
+
+When running locally (not in Docker), the CLI defaults to `./work` unless you pass `--work-dir` or set the `WORK_DIR` environment variable.
 
 Notes and security
 
@@ -58,6 +76,30 @@ Troubleshooting
 - If the container cannot reach your Ollama service, confirm the network route and that the Ollama server is listening on an accessible interface.
 - For development, prefer running the CLI locally inside a virtualenv so you can iterate quickly.
 
-Contributing
+- If you see errors like "ssh: No such file or directory" or git clone fails for `git@...` URLs, ensure the image has an SSH client and that you provide SSH credentials to the container. The image includes `openssh-client` so `ssh` is available, but you still need to provide keys.
 
-Pull requests welcome. Small improvements: add tests, harden prompt parsing, or add a dry-run mode.
+  Two common ways to make SSH keys available inside the container:
+
+  1. Mount your SSH directory (less secure on multi-user hosts):
+
+  ```bash
+  docker run --rm -e ENDPOINT="..." -e MODEL="..." \
+    -v ~/.ssh:/home/passivedocs/.ssh:ro \
+    -v $(pwd)/work:/work \
+    passivedocs:latest git@github.com:owner/repo.git
+  ```
+
+  2. Use SSH agent forwarding (recommended):
+
+  ```bash
+  # On the host
+  eval "$(ssh-agent -s)"
+  ssh-add ~/.ssh/id_rsa
+
+  # Run container with SSH_AUTH_SOCK mounted
+  docker run --rm -e ENDPOINT="..." -e MODEL="..." \
+    -v $SSH_AUTH_SOCK:/ssh-agent \
+    -e SSH_AUTH_SOCK=/ssh-agent \
+    -v $(pwd)/work:/work \
+    passivedocs:latest git@github.com:owner/repo.git
+  ```

@@ -13,4 +13,16 @@ if [ -z "${MODEL:-}" ]; then
 fi
 
 # Execute the CLI with provided args
-exec passivedocs "$@"
+# If WORK_DIR is set (from Dockerfile ENV) check writability. If the
+# mounted path is not writable by the current user, create a writable
+# fallback under /tmp and pass it to the CLI via --work-dir.
+WORK_DIR=${WORK_DIR:-/work}
+if [ -d "${WORK_DIR}" ] && [ -w "${WORK_DIR}" ]; then
+  exec passivedocs --work-dir "${WORK_DIR}" "$@"
+else
+  FALLBACK="/tmp/passivedocs-work"
+  mkdir -p "$FALLBACK"
+  chmod 700 "$FALLBACK"
+  echo "INFO: ${WORK_DIR} not writable; using fallback work dir: ${FALLBACK}" >&2
+  exec passivedocs --work-dir "${FALLBACK}" "$@"
+fi

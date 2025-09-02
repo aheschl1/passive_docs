@@ -12,14 +12,19 @@ from .config import Config
 
 def prepare_context(repo_path: Path):
     config = repo_path / "passivedocs.yml"
-    readme = repo_path / "README.md"
-    # passivedocs.yml is optional. If it does not exist, use an empty config.
-    with open(readme, 'r') as f:
-        readme = f.read()
+    # Look for common README filenames; tolerate missing README
+    readme_paths = [repo_path / "README.md", repo_path / "README", repo_path / "README.rst", repo_path / "README.txt"]
+    readme_content = ""
+    for p in readme_paths:
+        if p.exists():
+            with open(p, 'r', encoding='utf-8') as f:
+                readme_content = f.read()
+            break
 
+    # passivedocs.yml is optional. If it does not exist, use an empty config.
     config_obj = Config(config if config.exists() else None)
 
-    return readme, config_obj
+    return readme_content, config_obj
 
 
 def clone_repo(repo_name: str, work_dir: Path):
@@ -81,17 +86,25 @@ def make_pr(repo_dir: Path):
     help="Logging level",
 )
 @click.argument("repo_name")
-def main(repo_name, log_file, log_level):
+@click.option("--work-dir", default=None, type=click.Path(), help="Optional work directory (overrides WORK_DIR env var).")
+def main(repo_name, log_file, log_level, work_dir):
     setup_logging(log_file, log_level)
     logger = logging.getLogger(__name__)
 
     logger.info("Starting passivedocs for repo: %s", repo_name)
 
-    # Fixed work directory; do not allow overriding from CLI.
-    WORK_DIR = Path("./work")
+    # Work directory resolution order:
+    # 1. --work-dir CLI option (if provided)
+    # 2. WORK_DIR environment variable
+    # 3. default ./work for local runs
+    if work_dir:
+        env_work = work_dir
+    else:
+        env_work = os.environ.get("WORK_DIR", "./work")
+    WORK_DIR = Path(env_work)
     if not WORK_DIR.exists():
         logger.debug("Creating work_dir: %s", WORK_DIR)
-        os.makedirs(WORK_DIR)
+        os.makedirs(WORK_DIR, exist_ok=True)
 
     repo_dir = clone_repo(repo_name, WORK_DIR)
     logger.info("Cloned repository to %s", repo_dir)
