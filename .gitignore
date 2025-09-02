@@ -3,3 +3,4 @@ work/
 __pycache__
 *.txt
 .venv
+.env
