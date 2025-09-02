@@ -6,3 +6,7 @@ ignore:
     - "*/mod.rs"
     - "*.yml"
     - "*.lock"
+    - "*.sh"
+    - ".Dockerfile"
+    - ".gitignore"
+    - "tests/*"
