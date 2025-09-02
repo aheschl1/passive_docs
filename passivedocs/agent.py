@@ -103,7 +103,7 @@ class DocAgent:
             "{files}\n\n"
             "Repository readme:\n"
             "{readme}\n\n"
-            "You must only respond using the provided tools and follow the exact diff format rules below. If you cannot produce a valid diff for the requested change, use `view(path=...)` to request more context, or call `next()` to skip the file.\n\n"
+            "You must only respond using the provided tools and follow the unified diff format rules below. If you cannot produce documentation based on current context, use `view(path=...)` to request more context, or call `next()` to skip the file.\n\n"
             "TOOLS:\n"
             "  - `view(path: str)` - Request content of another file for context\n"
             "  - `diff(header: str, diff: str)` - Apply changes via a single unified diff hunk\n"

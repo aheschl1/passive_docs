@@ -83,18 +83,19 @@ def make_pr(repo_dir: Path):
     help="Logging level",
 )
 @click.argument("repo_name")
-@click.argument("work_dir", default="./work", type=click.Path())
-def main(repo_name, work_dir, log_file, log_level):
+def main(repo_name, log_file, log_level):
     setup_logging(log_file, log_level)
     logger = logging.getLogger(__name__)
 
     logger.info("Starting passivedocs for repo: %s", repo_name)
 
-    if not Path(work_dir).exists():
-        logger.debug("Creating work_dir: %s", work_dir)
-        os.makedirs(work_dir)
-        
-    repo_dir = clone_repo(repo_name, Path(work_dir))
+    # Fixed work directory; do not allow overriding from CLI.
+    WORK_DIR = Path("./work")
+    if not WORK_DIR.exists():
+        logger.debug("Creating work_dir: %s", WORK_DIR)
+        os.makedirs(WORK_DIR)
+
+    repo_dir = clone_repo(repo_name, WORK_DIR)
     logger.info("Cloned repository to %s", repo_dir)
 
     readme, config = prepare_context(repo_dir)
