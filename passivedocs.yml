@@ -7,6 +7,6 @@ ignore:
     - "*.yml"
     - "*.lock"
     - "*.sh"
-    - ".Dockerfile"
+    - "Dockerfile"
     - ".gitignore"
     - "tests/*"
