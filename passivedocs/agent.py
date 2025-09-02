@@ -114,7 +114,7 @@ class DocAgent:
             "- Every line in the hunk body must start with a single prefix character: ' ' (context), '-' (deletion), or '+' (addition).\n"
             "- Empty original lines are represented by a '-' line with no following space (i.e. '-' then newline), not '- '.\n"
             "- The header counts MUST MATCH the body: old_count = number of lines in the body that start with ' ' or '-', new_count = number of lines that start with ' ' or '+'.\n"
-            "- Include 1-3 context lines (prefixed with a space) around edits to ensure deterministic matching. Context lines must match the file EXACTLY, including leading/trailing whitespace and newlines.\n"
+            "- Include 0-3 context lines (prefixed with a space) around edits to ensure deterministic matching. Context lines must match the file EXACTLY, including leading/trailing whitespace and newlines.\n"
             "- Added lines ('+') should include the exact characters you want inserted and should end with a newline in the real file.\n"
             "- If the file ends without a trailing newline, use a literal line '\\ No newline at end of file' on its own line in the body where appropriate.\n"
             "- Do NOT include line-number prefixes in the diff body; use the raw content.\n"
